@@ -37,11 +37,11 @@ Terminal Command - python pacman.py -l trickySearch -p AStarFoodSearchAgent
 
 Additional Maze Configuration - python pacman.py -l tinySearch -p AStarFoodSearchAgent
 
-This searches through the entire maze using a A* Search algorithm to find the least cost path through all the food pellets, much faster than Breadth-FIrst Search because of enhanced heuristics.
+This searches through the entire maze using a Minimal Spanning Tree algorithm to find the least cost path through all the food pellets, much faster than Breadth-FIrst Search because of enhanced heuristics.
 
 Search for the path through all the food pellets
 ================================================
 
 Terminal Command - python pacman.py -l bigSearch -p ClosestDotSearchAgent -z .5 
 
-This searches through the entire maze using a A* Search algorithm to find the path through all the food pellets, much faster than Breadth-FIrst Search because of enhanced heuristics. This uses a Greedy-Search Principle as it tries to eat the closest food pellet until there are none left.
+This uses a Greedy-Search Principle as it tries to eat the closest food pellet until there are none left.
