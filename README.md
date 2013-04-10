@@ -1,4 +1,4 @@
-Hi, to perform the follow functions, the folder search in the repository must be copied to your local machine. Then cd with terminal to the folder search.
+To perform the follow functions, the repository must be copied to your local machine and then cd with terminal to the folder search. Files that were modified by me are search.py and searchAgents.py.
 
 There are several different search algorithms that I have implemented here in python code which can be executed as follows:
 
@@ -45,3 +45,16 @@ Search for the path through all the food pellets
 Terminal Command - python pacman.py -l bigSearch -p ClosestDotSearchAgent -z .5 
 
 This uses a Greedy-Search Principle as it tries to eat the closest food pellet until there are none left.
+
+Multiagent
+==========
+
+To perform the follow functions, the repository must be copied to your local machine and then cd with terminal to the folder multiagent. File edited by me was multiAgents.py.
+
+Search for the path through all the food pellets while avoiding the enemy agent
+===============================================================================
+
+Terminal Commands - python pacman.py -p ReflexAgent -l testClassic
+					python pacman.py -p ReflexAgent -l openClassic
+
+This uses an evaluation function to computer minimum spanning trees across all food pellets, and when pacman is close to his adversary, he changes his algorithm to become more prudent and avoid the enemy.

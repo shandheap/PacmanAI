@@ -19,17 +19,8 @@ depth first search (dfs), run the following command:
 
 Commands to invoke other search strategies can be found in the
 project description.
-
-Please only change the parts of the file you are asked to.
-Look for the lines that say
-
-"*** YOUR CODE HERE ***"
-
-The parts you fill in start about 3/4 of the way down.  Follow the
-project description for details.
-
-Good luck and happy searching!
 """
+
 from sets import Set
 from game import Directions
 from game import Agent
@@ -51,7 +42,14 @@ class GoWestAgent(Agent):
             return Directions.STOP
 
 class DisjointSets:
-
+    """
+    This class is a representation of Disjoint sets in python.
+    Use: In implementing Kruskal's algorithm for minimum spanning
+         trees. This algorithm is used to find the shortest path 
+         through all the food pellets.
+         
+    Author - Shandheap Shanmuganathan
+    """
     #Class to represent each set
     class DSet:
         #Private attributes
@@ -111,27 +109,17 @@ class DisjointSets:
         return self.find(self.__sets.get(label))
 
     def __str__(self):
-        #ret = ""
-        #for e in self.__sets:
-        #    ret = ret + "parent("+self.__sets[e].getLabel().__str__()+") = "+self.findLabel(e).parent.getLabel().__str__() + "\n"
         return str(self.__sets)
+
 class SearchAgent(Agent):
     """
     This very general search agent finds a path using a supplied search algorithm for a
     supplied search problem, then returns actions to follow that path.
 
     As a default, this agent runs DFS on a PositionSearchProblem to find location (1,1)
-
-    Options for fn include:
-      depthFirstSearch or dfs
-      breadthFirstSearch or bfs
-
-
-    Note: You should NOT change any code in SearchAgent
     """
 
     def __init__(self, fn='depthFirstSearch', prob='PositionSearchProblem', heuristic='nullHeuristic'):
-        # Warning: some advanced Python magic is employed below to find the right functions and problems
 
         # Get the search function from the name and heuristic
         if fn not in dir(search):
@@ -195,8 +183,6 @@ class PositionSearchProblem(search.SearchProblem):
     used to find paths to a particular point on the pacman board.
 
     The state space consists of (x,y) positions in a pacman game.
-
-    Note: this search problem is fully specified; you should NOT change it.
     """
 
     def __init__(self, gameState, costFn = lambda x: 1, goal=(1,1), start=None, warn=True, visualize=True):
@@ -306,27 +292,38 @@ class StayWestSearchAgent(SearchAgent):
         self.searchType = lambda state: PositionSearchProblem(state, costFn)
 
 def manhattanHeuristic(position, problem, info={}):
-    "The Manhattan distance heuristic for a PositionSearchProblem"
+    '''
+    The Manhattan distance heuristic for a PositionSearchProblem
+    '''
     xy1 = position
     xy2 = problem.goal
     return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
 def euclideanHeuristic(position, problem, info={}):
-    "The Euclidean distance heuristic for a PositionSearchProblem"
+    '''
+    The Euclidean distance heuristic for a PositionSearchProblem
+    '''
     xy1 = position
     xy2 = problem.goal
     return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
 
 def euclideanFunction(position1, position2):
-    "The Euclidean distance function for two points."
+    '''
+    Finds and returns the euclidean distance between two points
+
+    Author - Shandheap Shanmuganathan
+    '''
     xy1 = position1
     xy2 = position2
     return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
+
 class CornersProblem(search.SearchProblem):
     """
     This search problem finds paths through all four corners of a layout.
 
     You must select a suitable state space and successor function
+
+    Author - Shandheap Shanmuganathan
     """
 
     def __init__(self, startingGameState):
@@ -410,9 +407,13 @@ def cornersHeuristic(state, problem):
     This function should always return a number that is a lower bound
     on the shortest path from the state to a goal of the problem; i.e.
     it should be admissible (as well as consistent).
+
+    Author - Shandheap Shanmuganathan
     """
-    corners = problem.corners # These are the corner coordinates
-    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    # These are the corner coordinates
+    corners = problem.corners 
+    # These are the walls of the maze, as a Grid (game.py)
+    walls = problem.walls 
     mstSum = 0
     forest = DisjointSets()
     edgeQueue = util.PriorityQueue()
@@ -450,7 +451,9 @@ class FoodSearchProblem:
 
     A search state in this problem is a tuple ( pacmanPosition, foodGrid ) where
       pacmanPosition: a tuple (x,y) of integers specifying Pacman's position
-      foodGrid:       a Grid (see game.py) of either True or False, specifying remaining food
+      foodGrid:       a Grid (see game.py) of either True or False, specifying remaining food\
+    
+    Author - Shandheap Shanmuganathan
     """
     def __init__(self, startingGameState):
         self.start = (startingGameState.getPacmanPosition(), startingGameState.getFood())
@@ -508,28 +511,13 @@ class AStarFoodSearchAgent(SearchAgent):
 
 def foodHeuristic(state, problem):
     """
-    Your heuristic for the FoodSearchProblem goes here.
+    This heuristic helps to calculate the shortest path between
+    all the food pellets in the maze. It uses Kruskal's algorithm
+    to find the shortest distance through all the food pellets and
+    then adds the distance from the state to the closest
+    food pellet.
 
-    This heuristic must be consistent to ensure correctness.  First, try to come up
-    with an admissible heuristic; almost all admissible heuristics will be consistent
-    as well.
-        
-    If using A* ever finds a solution that is worse uniform cost search finds,
-    your heuristic is *not* consistent, and probably not admissible!  On the other hand,
-    inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
-
-    The state is a tuple ( pacmanPosition, foodGrid ) where foodGrid is a
-    Grid (see game.py) of either True or False. You can call foodGrid.asList()
-    to get a list of food coordinates instead.
-
-    If you want access to info like walls, capsules, etc., you can query the problem.
-    For example, problem.walls gives you a Grid of where the walls are.
-
-    If you want to *store* information to be reused in other calls to the heuristic,
-    there is a dictionary called problem.heuristicInfo that you can use. For example,
-    if you only want to count the walls once and store that value, try:
-      problem.heuristicInfo['wallCount'] = problem.walls.count()
-    Subsequent calls to this heuristic can access problem.heuristicInfo['wallCount']
+    Author - Shandheap Shanmuganathan
     """
 
     position, foodGrid = state
@@ -592,15 +580,6 @@ class AnyFoodSearchProblem(PositionSearchProblem):
     """
       A search problem for finding a path to any food.
 
-      This search problem is just like the PositionSearchProblem, but
-      has a different goal test, which you need to fill in below.  The
-      state space and successor function do not need to be changed.
-
-      The class definition above, AnyFoodSearchProblem(PositionSearchProblem),
-      inherits the methods of the PositionSearchProblem.
-
-      You can use this search problem to help you fill in
-      the findPathToClosestDot method.
     """
 
     def __init__(self, gameState):
@@ -643,10 +622,6 @@ def mazeDistance(point1, point2, gameState):
     Returns the maze distance between any two points, using the search functions
     you have already built.  The gameState can be any game state -- Pacman's position
     in that state is ignored.
-
-    Example usage: mazeDistance( (2,4), (5,6), gameState)
-
-    This might be a useful helper function for your ApproximateSearchAgent.
     """
     x1, y1 = point1
     x2, y2 = point2

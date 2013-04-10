@@ -9,7 +9,7 @@
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/pacman/pacman.html
 
 """
-In search.py, you will implement generic search algorithms which are called
+In search.py, I have implement generic search algorithms which are called
 by Pacman agents (in searchAgents.py).
 """
 
@@ -20,8 +20,6 @@ class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
     any of the methods (in object-oriented terminology: an abstract class).
-
-    You do not need to change anything in this class, ever.
     """
 
     def getStartState(self):
@@ -76,19 +74,28 @@ def tinyMazeSearch(problem):
 
 def depthFirstSearch(problem):
     """
-    Search the deepest nodes in the search tree first and returns the first accepted path to the goal. This is implemented with a graph search algorithm.
+    Search the nodes in the search tree with a depth-first search algorithm and
+    returns the first accepted path to the goal. 
+    This is implemented with a graph search algorithm.
+
+    Author - Shandheap Shanmuganathan
     """
     
+    # Uses two stacks to store the path to the state
+    # as well as the state that should be discovered
     fringe = util.Stack()
     paths = util.Stack()
     discovered = []
     fringe.push(problem.getStartState())
     paths.push([])
     
+    # While there are states still to be explored
     while not fringe.isEmpty():
         current_state = fringe.pop()
         current_path = paths.pop()
         discovered.append(current_state)
+        # If the algorithm finds a goal, then it immediately
+        # returns it
         if problem.isGoalState(current_state)==True:
             return current_path
         children = problem.getSuccessors(current_state)
@@ -102,7 +109,10 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     """
-    Search the shallowest nodes in the search tree first and returns the shortest possible accepted path. This is implemented with a graph search algorithm.
+    Search the shallowest nodes in the search tree first and returns the shortest possible accepted path. 
+    This is implemented with a graph search algorithm.
+
+    Author - Shandheap Shanmuganathan
     """
     fringe = util.Queue()
     paths = util.Queue()
@@ -113,7 +123,9 @@ def breadthFirstSearch(problem):
     while not fringe.isEmpty():
         current_state = fringe.pop()
         current_path = paths.pop()
-        discovered.append(deepcopy(current_state))          # Makes a deep copy so that the entry in list discovered is not altered by changes to current_state
+        # Makes a deep copy so that the entry in list discovered 
+        # is not altered by changes to current_state
+        discovered.append(deepcopy(current_state))          
         if problem.isGoalState(current_state)==True:
             return current_path
         children = problem.getSuccessors(current_state)
@@ -134,7 +146,12 @@ def breadthFirstSearch(problem):
     return None
 
 def uniformCostSearch(problem):
-    "Search the node of least total cost first and returns the shortest possible accepted path. This is implemented with a graph search algorithm."
+    '''
+    Search the node of least total cost first and returns the shortest possible accepted path. 
+    This is implemented with a graph search algorithm.
+
+    Author - Shandheap Shanmuganathan
+    '''
     
     fringe = util.PriorityQueue()
     paths = util.PriorityQueue()
@@ -169,7 +186,13 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic = nullHeuristic):
-    "Search the node that has the lowest combined cost and heuristic first."
+    '''
+    Search the node that has the lowest combined cost and heuristic first.
+    Implemented with a graph search algorithm. Uses nullHeuristic by default
+    if no other heuristic is specified.
+
+    Author - Shandheap Shanmuganathan
+    '''
     
     fringe = util.PriorityQueue()
     paths = util.PriorityQueue()
@@ -188,7 +211,9 @@ def aStarSearch(problem, heuristic = nullHeuristic):
             current_state = fringe.pop()
             current_path = paths.pop()
             cost = aStarCosts.pop()
-        discovered.append(deepcopy(current_state))              # Makes a deep copy so that the entry in list discovered is not altered by changes to current_state
+        # Makes a deep copy so that the entry in list discovered 
+        # is not altered by changes to current_state
+        discovered.append(deepcopy(current_state))              
         if problem.isGoalState(current_state)==True:
             return current_path
         children = problem.getSuccessors(current_state)
@@ -209,8 +234,6 @@ def aStarSearch(problem, heuristic = nullHeuristic):
                 paths.push(copy, successor[2] + cost + heuristicCost)
                 fringe.push(successor[0], successor[2] + cost + heuristicCost)
     return None
-
-
 
 # Abbreviations
 bfs = breadthFirstSearch
