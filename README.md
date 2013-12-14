@@ -2,6 +2,11 @@ To perform the follow functions, the repository must be copied to your local mac
 
 There are several different search algorithms that I have implemented here in python code which can be executed as follows:
 
+Search
+==========
+
+To perform the follow functions, the repository must be copied to your local machine and then cd with terminal to the folder search. File edited by me was search.py and searchAgents.py.
+
 Depth-First Search
 ==================
 
