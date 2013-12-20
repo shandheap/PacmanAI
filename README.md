@@ -60,6 +60,5 @@ Search for the path through all the food pellets while avoiding the enemy agent
 ===============================================================================
 
 Terminal Commands - python pacman.py -p ReflexAgent -l testClassic
-					python pacman.py -p ReflexAgent -l openClassic
 
 This uses an evaluation function to computer minimum spanning trees across all food pellets, and when pacman is close to his adversary, he changes his algorithm to become more prudent and avoid the enemy.
