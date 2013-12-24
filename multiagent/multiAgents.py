@@ -17,24 +17,13 @@ import sys
 from game import Agent
 
 def euclideanFunction(position1, position2):
-    '''
-    Returns the euclidean distance between two points
-
-    Author - Shandheap Shanmuganathan
-    '''
+    "The Euclidean distance function for two points."
     xy1 = position1
     xy2 = position2
     return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
 
 class DisjointSets:
-    """
-    This class is a representation of Disjoint sets in python.
-    Use: In implementing Kruskal's algorithm for minimum spanning
-         trees. This algorithm is used to find the shortest path 
-         through all the food pellets.
 
-    Author - Shandheap Shanmuganathan
-    """
     #Class to represent each set
     class Set:
         #Private attributes
@@ -94,6 +83,9 @@ class DisjointSets:
         return self.find(self.__sets.get(label))
 
     def __str__(self):
+        #ret = ""
+        #for e in self.__sets:
+        #    ret = ret + "parent("+self.__sets[e].getLabel().__str__()+") = "+self.findLabel(e).parent.getLabel().__str__() + "\n"
         return str(self.__sets)
 
 class ReflexAgent(Agent):
@@ -109,9 +101,11 @@ class ReflexAgent(Agent):
 
     def getAction(self, gameState):
         """
+        You do not need to change this method, but you're welcome to.
+
         getAction chooses among the best options according to the evaluation function.
 
-        Just like in the as before, getAction takes a GameState and returns
+        Just like in the previous project, getAction takes a GameState and returns
         some Directions.X for some X in the set {North, South, West, East, Stop}
         """
         # Collect legal moves and successor states
@@ -209,7 +203,7 @@ class MultiAgentSearchAgent(Agent):
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
-      Minimax agent 
+      Minimax agent (question 2)
     """
 
     def getAction(self, gameState):
@@ -228,96 +222,121 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
           gameState.getNumAgents():
             Returns the total number of agents in the game
-        
-        Author - Shandheap Shanmuganathan
+          Author - Shandheap Shanmuganathan
         """
 
          # Collect legal moves and successor states
-        legalMoves = gameState.getLegalActions()
+        legalMoves = gameState.getLegalActions(0)
         scores = []
         # Choose one of the best actions
-        for action in legalMoves:
-          successorGameState = gameState.generateSuccessor(0, action)
-          scores.append(self.miniMax(successorGameState, 0, 1))
+        for move in legalMoves:
+            successorGameState = gameState.generateSuccessor(0, move)
+            scores.append(self.value(successorGameState, 1, 0))
         bestScore = max(scores)
-        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        bestIndices = []
+        for index in range(len(scores)):
+            if scores[index] == bestScore:
+                bestIndices.append(index)
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-        # print scores
         return legalMoves[chosenIndex]
 
-    def maxAgent(self, gameState, currentDepth):
-        '''
-        Agent for the pacman AI.
-        Author - Shandheap Shanmuganathan
-        '''
-        # Collect legal moves and successor states
-        legalMoves = gameState.getLegalActions(0)
-        v = - 1 - sys.maxint
-        for action in legalMoves:
-          successorGameState = gameState.generateSuccessor(0, action)
-          v = max(v, self.miniMax(successorGameState, currentDepth, 1))
-        # bestIndices = [index for index in range(len(scores)) if scores[index] == v]
-        # chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-        # print scores
-        return v
-
-    def minAgent(self, gameState, currentDepth, enemyID):
-        '''
-        Agent for the enemy AI.
-        Author - Shandheap Shanmuganathan
-        '''
-
-        # Collect legal moves and successor states
-        legalMoves = gameState.getLegalActions(enemyID)
-        v = sys.maxint
-        for action in legalMoves:
-          successorGameState = gameState.generateSuccessor(enemyID, action)
-          v = min(v, self.miniMax(successorGameState, currentDepth, 0))
-        # bestIndices = [index for index in range(len(scores)) if scores[index] == v]
-        # chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-        # print scores
-        return v
-
-    def miniMax(self, gameState, currentDepth, playerID):
-        '''
-        Algorithm to find the minimax value at gameState, with limiter
-        self.depth as the maximum depth recursion.
-
-        Author - Shandheap Shanmuganathan
-        '''
+    def value(self, gameState, agent, currentDepth):
         if self.depth == currentDepth or gameState.isWin() or len(gameState.getLegalActions(0)) == 0 or gameState.isLose():
-          return self.evaluationFunction(gameState)
-        if playerID == 0:
-          return self.maxAgent(gameState, currentDepth)
+            return self.evaluationFunction(gameState)
         
-        numOfAgents = gameState.getNumAgents()
-        enemyScores = 0
-        currentDepth += 1
-        tempState = gameState
-        for agentID in range(numOfAgents - 1):
-            legalMoves = tempState.getLegalActions(agentID + 1)
-            # Enemy chooses one of the best actions
-            scores = [self.miniMax(tempState, currentDepth, agentID) for action in legalMoves]
-            enemyScores = self.minAgent(gameState, currentDepth, agentID + 1)
-            bestIndices = [index for index in range(len(scores)) if scores[index] == enemyScores]
-            chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-            tempState = gameState.generateSuccessor(agentID, legalMoves[chosenIndex])
-        return enemyScores
+        if agent == 0:
+            return self.max_value(gameState, currentDepth)
+        else:
+            return self.min_value(gameState, agent, currentDepth)
+
+    def max_value(self, gameState, currentDepth):
+        v = - sys.maxint - 1
+        legalMoves = gameState.getLegalActions(0)
+        for move in legalMoves:
+            v = max(v, self.value(gameState.generateSuccessor(0, move), 1, currentDepth))
+        return v
+
+    def min_value(self, gameState, agent, currentDepth):
+        v = sys.maxint
+        if agent == gameState.getNumAgents():
+            currentDepth += 1
+            return self.value(gameState, 0, currentDepth)
+        legalMoves = gameState.getLegalActions(agent)
+        for move in legalMoves:
+            v = min(v, self.value(gameState.generateSuccessor(agent, move), agent+1, currentDepth))
+        return v
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
-      Your minimax agent with alpha-beta pruning 
+      Your minimax agent with alpha-beta pruning (question 3)
     """
 
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        util.raiseNotDefined()
+         # Collect legal moves and successor states
+        legalMoves = gameState.getLegalActions(0)
+        scores = []
+        # Initialize alpha and beta
+        alpha = - sys.maxint - 1
+        beta = sys.maxint
+        # Choose one of the best actions
+        for move in legalMoves:
+            successorGameState = gameState.generateSuccessor(0, move)
+            result = self.value(successorGameState, 1, 0, alpha, beta)
+            scores.append(result[0])
+            alpha = result[1]
+            beta = result[2]
+        bestScore = max(scores)
+        bestIndices = []
+        for index in range(len(scores)):
+            if scores[index] == bestScore:
+                bestIndices.append(index)
+        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        return legalMoves[chosenIndex]
+
+    def value(self, gameState, agent, currentDepth, alpha, beta):
+        if self.depth == currentDepth or gameState.isWin() or len(gameState.getLegalActions(0)) == 0 or gameState.isLose():
+            return [self.evaluationFunction(gameState), alpha, beta]
+        
+        if agent == 0:
+            return self.max_value(gameState, currentDepth, alpha, beta)
+        else:
+            return self.min_value(gameState, agent, currentDepth, alpha, beta)
+
+    def max_value(self, gameState, currentDepth, alpha, beta):
+        v = - sys.maxint - 1
+        legalMoves = gameState.getLegalActions(0)
+        for move in legalMoves:
+            result = self.value(gameState.generateSuccessor(0, move),
+                         1, currentDepth, alpha, beta)
+            v = max(v, result[0])
+            alpha = max(alpha, result[1])
+            if v >= beta: return [v, alpha, beta]
+            alpha = max(alpha, v)
+        beta = min(beta, alpha)
+        return [v, alpha, beta]
+
+    def min_value(self, gameState, agent, currentDepth, alpha, beta):
+        v = sys.maxint
+        if agent == gameState.getNumAgents():
+            currentDepth += 1
+            return self.value(gameState, 0, currentDepth, alpha, beta)
+        legalMoves = gameState.getLegalActions(agent)
+        for move in legalMoves:
+            result = self.value(gameState.generateSuccessor(agent, move),
+                         agent+1, currentDepth, alpha, beta)
+            v = min(v, result[0])
+            beta = min(beta, result[2])
+            if v <= alpha: return [v, alpha, beta]
+            beta = min(beta, v)
+        alpha = max(alpha, beta)
+        return [v, alpha, beta]
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
-      Your expectimax agent 
+      Your expectimax agent (question 4)
     """
 
     def getAction(self, gameState):
@@ -327,14 +346,17 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
+        "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-      evaluation function.
+      evaluation function (question 5).
 
+      DESCRIPTION: <write something here so we know what you did>
     """
+    "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
 # Abbreviation
@@ -353,5 +375,6 @@ class ContestAgent(MultiAgentSearchAgent):
           Ghosts don't behave randomly anymore, but they aren't perfect either -- they'll usually
           just make a beeline straight towards Pacman (or away from him if they're scared!)
         """
+        "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
