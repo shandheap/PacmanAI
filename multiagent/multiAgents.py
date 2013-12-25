@@ -130,6 +130,9 @@ class ReflexAgent(Agent):
         newScaredTimes holds the number of moves that each ghost will remain
         scared because of Pacman having eaten a power pellet.
 
+        The evaluation function consists of a minimum spanning tree algorithm (Kruskal's
+        algorithm) to assigns scores to states.
+
         Author - Shandheap Shanmuganathan
         """
 
@@ -274,6 +277,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
+
+          Author - Shandheap Shanmuganathan
         """
          # Collect legal moves and successor states
         legalMoves = gameState.getLegalActions(0)
@@ -287,7 +292,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             result = self.value(successorGameState, 1, 0, alpha, beta)
             scores.append(result[0])
             alpha = result[1]
-            beta = result[2]
         bestScore = max(scores)
         bestIndices = []
         for index in range(len(scores)):
@@ -309,11 +313,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         v = - sys.maxint - 1
         legalMoves = gameState.getLegalActions(0)
         for move in legalMoves:
-            result = self.value(gameState.generateSuccessor(0, move),
-                         1, currentDepth, alpha, beta)
+            successorGameState = gameState.generateSuccessor(0, move)
+            result = self.value(successorGameState, 1, currentDepth, alpha, beta)
             v = max(v, result[0])
             alpha = max(alpha, result[1])
-            if v >= beta: return [v, alpha, beta]
+            if v > beta: return [v, alpha, beta]
             alpha = max(alpha, v)
         beta = min(beta, alpha)
         return [v, alpha, beta]
@@ -325,11 +329,12 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             return self.value(gameState, 0, currentDepth, alpha, beta)
         legalMoves = gameState.getLegalActions(agent)
         for move in legalMoves:
-            result = self.value(gameState.generateSuccessor(agent, move),
+            successorGameState = gameState.generateSuccessor(agent, move)
+            result = self.value(successorGameState,
                          agent+1, currentDepth, alpha, beta)
             v = min(v, result[0])
             beta = min(beta, result[2])
-            if v <= alpha: return [v, alpha, beta]
+            if v < alpha: return [v, alpha, beta]
             beta = min(beta, v)
         alpha = max(alpha, beta)
         return [v, alpha, beta]
@@ -345,19 +350,95 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
+
+          Author - Shandheap Shanmuganathan
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+         # Collect legal moves and successor states
+        legalMoves = gameState.getLegalActions(0)
+        scores = []
+        # Choose one of the best actions
+        for move in legalMoves:
+            successorGameState = gameState.generateSuccessor(0, move)
+            scores.append(self.value(successorGameState, 1, 0))
+        bestScore = max(scores)
+        bestIndices = []
+        for index in range(len(scores)):
+            if scores[index] == bestScore:
+                bestIndices.append(index)
+        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        return legalMoves[chosenIndex]
+
+    def value(self, gameState, agent, currentDepth):
+        if self.depth == currentDepth or gameState.isWin() or len(gameState.getLegalActions(0)) == 0 or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        
+        if agent == 0:
+            return self.max_value(gameState, currentDepth)
+        else:
+            return self.exp_value(gameState, agent, currentDepth)
+
+    def max_value(self, gameState, currentDepth):
+        v = - sys.maxint - 1
+        legalMoves = gameState.getLegalActions(0)
+        for move in legalMoves:
+            v = max(v, self.value(gameState.generateSuccessor(0, move), 1, currentDepth))
+        return v
+
+    def exp_value(self, gameState, agent, currentDepth):
+        v = 0
+        if agent == gameState.getNumAgents():
+            currentDepth += 1
+            return self.value(gameState, 0, currentDepth)
+        legalMoves = gameState.getLegalActions(agent)
+        for move in legalMoves:
+            v += self.value(gameState.generateSuccessor(agent, move), agent+1, currentDepth)
+        return v / len(legalMoves)
 
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      Author - Shandheap Shanmuganathan
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Useful information you can extract from a GameState (pacman.py)
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+    
+    position, foodGrid = newPos, newFood
+    foodPositions = foodGrid.asList()
+    mstSum = 0
+    forest = DisjointSets()
+    edgeQueue = util.PriorityQueue()
+    distancesToFood = []
+    distancesToGhosts = []
+    for foodLocation in foodPositions:
+        positionToFoodlocation = euclideanFunction(position, foodLocation)
+        distancesToFood.append(positionToFoodlocation)
+        forest.makeSet(foodLocation)
+    for otherFood in foodPositions:
+        if foodLocation != otherFood:
+            distance = abs(foodLocation[0] - otherFood[0]) + abs(foodLocation[1] - otherFood[1])
+            edgeQueue.push((foodLocation, otherFood, distance), distance)
+    while not edgeQueue.isEmpty():
+        edge = edgeQueue.pop()
+        if forest.findLabel(edge[0]) != forest.findLabel(edge[1]):
+            mstSum += edge[2]
+            forest.join(edge[0], edge[1])
+    # Finds all the distances from current position to ghosts.
+    for ghost_pos in currentGameState.getGhostPositions():
+      distancesToGhosts.append(abs(position[0] - ghost_pos[0]) + abs(position[1] - ghost_pos[1]))
+    if distancesToFood != []:
+        minDistance = min(distancesToFood)
+    else:
+        minDistance = 0
+    if min(distancesToGhosts) > 2:
+      return currentGameState.getScore() - mstSum - minDistance
+    return currentGameState.getScore() - mstSum - minDistance - min(distancesToGhosts) * abs(currentGameState.getScore())
+
 
 # Abbreviation
 better = betterEvaluationFunction
