@@ -1,6 +1,6 @@
 #Instructions to Run
 
-+ Copy the directory to /some/path.
++ Clone repository to /some/path.
 
 + cd to /some/path/search. README.md in search folder has instructions to run search functions such as: 
 	+ Depth-First Search
