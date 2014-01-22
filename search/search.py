@@ -96,7 +96,7 @@ def depthFirstSearch(problem):
         discovered.append(current_state)
         # If the algorithm finds a goal, then it immediately
         # returns it
-        if problem.isGoalState(current_state)==True:
+        if problem.isGoalState(current_state):
             return current_path
         children = problem.getSuccessors(current_state)
         for successor in children:
@@ -126,7 +126,7 @@ def breadthFirstSearch(problem):
         # Makes a deep copy so that the entry in list discovered 
         # is not altered by changes to current_state
         discovered.append(deepcopy(current_state))          
-        if problem.isGoalState(current_state)==True:
+        if problem.isGoalState(current_state):
             return current_path
         children = problem.getSuccessors(current_state)
         for successor in children:
@@ -166,7 +166,7 @@ def uniformCostSearch(problem):
         current_path = paths.pop()
         cost = costs.pop()
         discovered.append(current_state)
-        if problem.isGoalState(current_state)==True:
+        if problem.isGoalState(current_state):
             return current_path
         children = problem.getSuccessors(current_state)
         for successor in children:
@@ -214,7 +214,7 @@ def aStarSearch(problem, heuristic = nullHeuristic):
         # Makes a deep copy so that the entry in list discovered 
         # is not altered by changes to current_state
         discovered.append(deepcopy(current_state))              
-        if problem.isGoalState(current_state)==True:
+        if problem.isGoalState(current_state):
             return current_path
         children = problem.getSuccessors(current_state)
         for successor in children:
